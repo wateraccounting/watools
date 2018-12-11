@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+"""
+Authors: Tim Hessels
+         UNESCO-IHE 2016
+Contact: t.hessels@unesco-ihe.org
+Repository: https://github.com/wateraccounting/watools
+Module: Collect/MOD9
+
+Description:
+This module downloads MOD9 reflectance data from
+https://e4ftl01.cr.usgs.gov/. Use the MOD9.REF_daily function to
+download and create daily Reflectance images in Gtiff format.
+The data is available between 2000-02-18 till present.
+
+Examples:
+from watools.Collect import MOD9
+MOD9.REF_daily(Dir='C:/Temp3/', Startdate='2003-12-01', Enddate='2003-12-20',
+           latlim=[41, 45], lonlim=[-8, -5])
+"""
+
+from .REF_daily import main as REF_daily
+
+__all__ = ['REF_daily']
+
+__version__ = '0.1'
