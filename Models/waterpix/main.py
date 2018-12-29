@@ -12,7 +12,7 @@ import datetime as dt
 from warnings import filterwarnings
 import pandas as pd
 import netCDF4
-from watools.Models.waterpix.functions import (calculate_first_round, calculate_second_round,
+from waterpix.functions import (calculate_first_round, calculate_second_round,
                                 return_empty_df_columns, get_neighbors,
                                 percolation_fit_error,
                                 replace_with_closest, budyko,
@@ -206,7 +206,7 @@ def run(input_nc, output_nc,
                                     fill_value=std_fv)
     etg_var.long_name = 'Green evapotranspiration'
     etg_var.units = 'mm/year'
-
+    
     etgm_var = out_nc.createVariable('ETgreen_M', 'f8',
                                     ('time_yyyymm', 'latitude', 'longitude'),
                                     fill_value=std_fv)
@@ -219,14 +219,14 @@ def run(input_nc, output_nc,
     # Blue Evapotranspiration (yearly)
     etb_var.long_name = 'Blue evapotranspiration'
     etb_var.units = 'mm/year'
-
+    
     etbm_var = out_nc.createVariable('ETblue_M', 'f8',
                                     ('time_yyyymm', 'latitude', 'longitude'),
                                     fill_value=std_fv)
     etbm_var.long_name = 'Blue evapotranspiration m'
     etbm_var.units = 'mm/month'
 
-
+    
     # Rainfed pixels
     gpix_var = out_nc.createVariable('RainfedPixels_Y', 'l',
                                      ('time_yyyy', 'latitude', 'longitude'),

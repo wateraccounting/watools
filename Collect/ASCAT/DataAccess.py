@@ -178,7 +178,7 @@ def Download_ASCAT_from_VITO(End_filename, output_folder_temp, Date, yID, xID):
     fh = Dataset(output_ncfile_ASCAT)
     dataset = fh.variables['SWI_010'][:,yID[0]:yID[1], xID[0]:xID[1]]
     data = np.squeeze(dataset.data, axis=0)
-	data = data * 0.5
+    data = data * 0.5
     data[data > 100.] = -9999
     fh.close()
 

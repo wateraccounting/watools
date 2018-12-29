@@ -154,7 +154,7 @@ def Clip_Dataset(local_filename, Filename_out, latlim, lonlim):
     geo = tuple([-180 + 0.05*XID[0],0.05,0,90 - 0.05*YID[0],0,-0.05])
 
     # Clip Array
-    SEBS_Array_clipped = SEBS_Array[YID[0]:YID[1], XID[0]:XID[1]]
+    SEBS_Array_clipped = SEBS_Array[YID[0]:YID[1], XID[0]:XID[1]] * 0.1
 
     # Save tiff file
     DC.Save_as_tiff(Filename_out, SEBS_Array_clipped, geo, "WGS84")
