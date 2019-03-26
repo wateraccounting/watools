@@ -142,7 +142,7 @@ def DownloadData(Dir, Startdate, Enddate, latlim, lonlim, Waitbar, version, Prod
                 local_filename = os.path.join(temp_folder, Filename_only)
 
             if Product == "ETact":
-                Filename_out= os.path.join(output_folder,'ETa_SSEBop_V4_mm-day-1_daily_%s.%02s.%02s.tif' %(Date.strftime('%Y'), Date.strftime('%m'), Date.strftime('%d')))
+                Filename_out= os.path.join(output_folder,'ETa_SSEBop_V4_mm-month-1_monthly_%s.%02s.%02s.tif' %(Date.strftime('%Y'), Date.strftime('%m'), Date.strftime('%d')))
                 # Define the downloaded zip file
                 Filename_only_zip = "m%s%02d.zip" %(str(year), month)
                 # The end file name after downloading and unzipping
