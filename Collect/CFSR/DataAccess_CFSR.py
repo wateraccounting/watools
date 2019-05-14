@@ -9,6 +9,7 @@ Module: Collect/CFSR
 # General modules
 import pandas as pd
 import os
+import gdal
 import numpy as np
 from netCDF4 import Dataset
 import re
@@ -150,8 +151,10 @@ def RetrieveData(Date, args):
             band=(int(Date.strftime('%d')) - 1) * 28 + (i + 1) * 7
 
             # Convert the data
-            DC.Convert_grb2_to_nc(local_filename, FileNC6hour, band)
-
+#            DC.Convert_grb2_to_nc(local_filename, FileNC6hour, band)
+            gds =  gdal.Open(local_filename)
+            gdal.Translate(FileNC6hour, gds, bandList=[band], format='netCDF')
+            gds = None
         if Version == 1:
 
             if Date < pd.Timestamp(pd.datetime(2011, 1, 1)):

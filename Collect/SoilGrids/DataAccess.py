@@ -71,7 +71,7 @@ def DownloadData(output_folder, latlim, lonlim, dataset, level = None):
             output_file = Download_Data(output_folder_trash, level_name, dataset)
     
             # Clip the data
-            RC.Clip_Dataset_GDAL(output_file, nameEnd, latlim, lonlim)
+            RC.clip_data(output_filename, latlim, lonlim, output_name=nameEnd)
     
         except:
             print("Was not able to create the wanted dataset")

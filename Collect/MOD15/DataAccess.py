@@ -139,8 +139,8 @@ def RetrieveData(Date, args):
     name_collect = os.path.join(output_folder, 'Merged.tif')
 
     # Reproject the MODIS product to epsg_to
-    epsg_to ='4326'
-    name_reprojected = RC.reproject_MODIS(name_collect, epsg_to)
+#    epsg_to ='4326'
+    name_reprojected = RC.reproject_modis_wgs84(name_collect, method = 2)
 
     # Clip the data to the users extend
     data, geo = RC.clip_data(name_reprojected, latlim, lonlim)

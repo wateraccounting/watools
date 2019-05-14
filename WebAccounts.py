@@ -9,12 +9,12 @@ Created on Thu Mar 17 09:27:36 2016
 def Accounts(Type=None):
 
     User_Pass = {
-     'NASA': ['', ''],
+     'NASA': ['cmicha','EarthData1234'],
      'GLEAM': ['', ''],
-     'FTP_WA': ['', ''],
+     'FTP_WA': ['THessels','painole_2016'],
      'MSWEP': ['', ''],
      'Copernicus': ['', ''],  #https://land.copernicus.vgt.vito.be/PDF/
-     'VITO': ['', '']}     #https://www.vito-eodata.be/PDF/datapool/
+     'VITO': ['claireIHE', 'Cgls1234']}     #https://www.vito-eodata.be/PDF/datapool/
 	 
     Selected_Path = User_Pass[Type]
 

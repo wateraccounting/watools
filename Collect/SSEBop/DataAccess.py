@@ -173,7 +173,7 @@ def DownloadData(Dir, Startdate, Enddate, latlim, lonlim, Waitbar, version, Prod
                     
                 if Product == "ETact":    
                     # Clip dataset
-                    RC.Clip_Dataset_GDAL(local_filename, Filename_out, latlim, lonlim)
+                    RC.clip_data(local_filename, latlim, lonlim, output_name=Filename_out)
                     os.remove(local_filename)
 
             except:
