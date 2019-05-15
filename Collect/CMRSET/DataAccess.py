@@ -99,7 +99,7 @@ def DownloadData(Dir, Startdate, Enddate, latlim, lonlim, Waitbar):
                 Download_CMRSET_from_WA_FTP(local_filename, Filename_in)
 
                 # Clip dataset
-                RC.clip_data(local_filename, latlim, lonlim, output_name=Filename_out)
+                RC.Clip_Dataset_GDAL(local_filename, Filename_out, latlim, lonlim)
                 os.remove(local_filename)
 
             except:

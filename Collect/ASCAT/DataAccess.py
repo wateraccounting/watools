@@ -24,7 +24,7 @@ import os
 import pandas as pd
 import requests
 from requests.auth import HTTPBasicAuth
-#import h5py
+import h5py
 import shutil
 from netCDF4 import Dataset
 

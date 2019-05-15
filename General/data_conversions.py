@@ -7,8 +7,8 @@ Created on Sun Dec 18 13:07:32 2016
 import gzip
 import zipfile
 import tarfile
-from osgeo import gdal, osr
-#import osr
+from osgeo import gdal
+import osr
 import os
 import pandas as pd
 import numpy as np
@@ -62,21 +62,21 @@ def Convert_nc_to_tiff(input_nc, output_folder):
 
     return()
 
-#def Convert_grb2_to_nc(input_wgrib, output_nc, band):
-#
-#    import watools.General.raster_conversions as RC
-#
-#    # Get environmental variable
-#    WA_env_paths = os.environ["WA_PATHS"].split(';')
-#    GDAL_env_path = WA_env_paths[0]
-#    GDAL_TRANSLATE_PATH = os.path.join(GDAL_env_path, 'gdal_translate.exe')
-#
-#    # Create command
-#    fullCmd = ' '.join(['"%s" -of netcdf -b %d' %(GDAL_TRANSLATE_PATH, band), input_wgrib, output_nc])  # -r {nearest}
-#
-#    RC.Run_command_window(fullCmd)
-#
-#    return()
+def Convert_grb2_to_nc(input_wgrib, output_nc, band):
+
+    import watools.General.raster_conversions as RC
+
+    # Get environmental variable
+    WA_env_paths = os.environ["WA_PATHS"].split(';')
+    GDAL_env_path = WA_env_paths[0]
+    GDAL_TRANSLATE_PATH = os.path.join(GDAL_env_path, 'gdal_translate.exe')
+
+    # Create command
+    fullCmd = ' '.join(['"%s" -of netcdf -b %d' %(GDAL_TRANSLATE_PATH, band), input_wgrib, output_nc])  # -r {nearest}
+
+    RC.Run_command_window(fullCmd)
+
+    return()
 
 def Convert_adf_to_tiff(input_adf, output_tiff):
     """

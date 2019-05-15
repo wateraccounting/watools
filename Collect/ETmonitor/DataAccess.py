@@ -131,10 +131,10 @@ def DownloadData(Dir, Startdate, Enddate, latlim, lonlim, Type, Waitbar):
 
                 # Reproject dataset
                 epsg_to ='4326'
-                name_reprojected_ETmonitor = RC.reproject_modis_wgs84(local_filename)
+                name_reprojected_ETmonitor = RC.reproject_MODIS(local_filename, epsg_to)
 
                 # Clip dataset
-                RC.clip_data(name_reprojected_ETmonitor, latlim, lonlim, output_name=Filename_out)
+                RC.Clip_Dataset_GDAL(name_reprojected_ETmonitor, Filename_out, latlim, lonlim)
                 os.remove(name_reprojected_ETmonitor)
                 os.remove(local_filename)
 

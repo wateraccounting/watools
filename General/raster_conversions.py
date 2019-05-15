@@ -6,8 +6,8 @@ Created on Fri Dec 16 19:04:22 2016
 """
 import pandas as pd
 import glob
-from osgeo import gdal, osr
-#import osr
+import gdal
+import osr
 import os
 import sys
 import numpy as np
@@ -326,28 +326,28 @@ def Open_nc_dict(input_netcdf, group_name, startdate = '', enddate = ''):
 
     return(dictionary)
 
-#def Clip_Dataset_GDAL(input_name, output_name, latlim, lonlim):
-#    """
-#    Clip the data to the defined extend of the user (latlim, lonlim) by using the gdal_translate executable of gdal.
-#
-#    Keyword Arguments:
-#    input_name -- input data, input directory and filename of the tiff file
-#    output_name -- output data, output filename of the clipped file
-#    latlim -- [ymin, ymax]
-#    lonlim -- [xmin, xmax]
-#    """
-#    # Get environmental variable
-#    WA_env_paths = os.environ["WA_PATHS"].split(';')
-#    GDAL_env_path = WA_env_paths[0]
-#    GDALTRANSLATE_PATH = os.path.join(GDAL_env_path, 'gdal_translate.exe')
-#
-#    # find path to the executable
-#    fullCmd = ' '.join(["%s" %(GDALTRANSLATE_PATH), '-projwin %s %s %s %s -of GTiff %s %s'  %(lonlim[0], latlim[1], lonlim[1], latlim[0], input_name, output_name)])
-#    Run_command_window(fullCmd)
-#
-#    return()
+def Clip_Dataset_GDAL(input_name, output_name, latlim, lonlim):
+    """
+    Clip the data to the defined extend of the user (latlim, lonlim) by using the gdal_translate executable of gdal.
 
-def clip_data(input_file, latlim, lonlim, output_name = None):
+    Keyword Arguments:
+    input_name -- input data, input directory and filename of the tiff file
+    output_name -- output data, output filename of the clipped file
+    latlim -- [ymin, ymax]
+    lonlim -- [xmin, xmax]
+    """
+    # Get environmental variable
+    WA_env_paths = os.environ["WA_PATHS"].split(';')
+    GDAL_env_path = WA_env_paths[0]
+    GDALTRANSLATE_PATH = os.path.join(GDAL_env_path, 'gdal_translate.exe')
+
+    # find path to the executable
+    fullCmd = ' '.join(["%s" %(GDALTRANSLATE_PATH), '-projwin %s %s %s %s -of GTiff %s %s'  %(lonlim[0], latlim[1], lonlim[1], latlim[0], input_name, output_name)])
+    Run_command_window(fullCmd)
+
+    return()
+
+def clip_data(input_file, latlim, lonlim):
     """
     Clip the data to the defined extend of the user (latlim, lonlim) or to the
     extend of the DEM tile
@@ -357,14 +357,14 @@ def clip_data(input_file, latlim, lonlim, output_name = None):
     latlim -- [ymin, ymax]
     lonlim -- [xmin, xmax]
     """
-    import watools.General.data_conversions as DC
     try:
         if input_file.split('.')[-1] == 'tif':
             dest_in = gdal.Open(input_file)
         else:
-            dest_in = input_file[1]
+            dest_in = input_file
     except:
-        dest_in = input_file[1]
+        dest_in = input_file
+
     # Open Array
     data_in = dest_in.GetRasterBand(1).ReadAsArray()
 
@@ -385,12 +385,9 @@ def clip_data(input_file, latlim, lonlim, output_name = None):
     data = np.zeros([End_y - Start_y, End_x - Start_x])
 
     data = data_in[Start_y:End_y,Start_x:End_x]
-    
-    
-    if output_name:
-        DC.Save_as_tiff(name=output_name, data=data, geo=Geo_out, projection=dest_in.GetProjection())
     dest_in = None
-    return (data, Geo_out)
+
+    return(data, Geo_out)
 
 def reproject_dataset_epsg(dataset, pixel_spacing, epsg_to, method = 2):
     """
@@ -424,6 +421,7 @@ def reproject_dataset_epsg(dataset, pixel_spacing, epsg_to, method = 2):
 
     # Get EPSG code
     epsg_from = Get_epsg(g)
+
     # Get the Geotransform vector:
     geo_t = g.GetGeoTransform()
     # Vector components:
@@ -490,136 +488,30 @@ def reproject_dataset_epsg(dataset, pixel_spacing, epsg_to, method = 2):
         gdal.ReprojectImage(g, dest, wgs84.ExportToWkt(), osng.ExportToWkt(), gdal.GRA_Average)
     return dest, ulx, lry, lrx, uly, epsg_to
 
-def reproject_modis_wgs84(dataset, method = 2):
-    """
-    A sample function to reproject and resample a GDAL dataset from within
-    Python. The idea here is to reproject from one system to another, as well
-    as to change the pixel size. The procedure is slightly long-winded, but
-    goes like this:
-
-    1. Set up the two Spatial Reference systems.
-    2. Open the original dataset, and get the geotransform
-    3. Calculate bounds of new geotransform by projecting the UL corners
-    4. Calculate the number of pixels with the new projection & spacing
-    5. Create an in-memory raster dataset
-    6. Perform the projection
+def reproject_MODIS(input_name, epsg_to):
+    '''
+    Reproject the merged data file by using gdalwarp. The input projection must be the MODIS projection.
+    The output projection can be defined by the user.
 
     Keywords arguments:
-    dataset -- 'C:/file/to/path/file.tif'
+    input_name -- 'C:/file/to/path/file.tif'
         string that defines the input tiff file
     epsg_to -- integer
-         The EPSG code of the output dataset
-    method -- 1,2,3,4 default = 2
-        1 = Nearest Neighbour, 2 = Bilinear, 3 = lanzcos, 4 = average
-    """
-    import watools.General.data_conversions as DC
-    # MODIS Proj4 string
-    proj4_str = "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"
-    tsrs = osr.SpatialReference()
-    tsrs.ImportFromProj4(proj4_str)
-    s_wkt = tsrs.ExportToWkt()
-    pixel_spacing = .0039306
-    # 1) Open the dataset
-    g = gdal.Open(dataset)
-    if g is None:
-        print('input folder does not exist')
+        The EPSG code of the output dataset
+    '''
+    # Define the output name
+    name_out = ''.join(input_name.split(".")[:-1]) + '_reprojected.tif'
 
-    # Get the Geotransform vector:
-    geo_t = g.GetGeoTransform()
-    # Vector components:
-    # 0- The Upper Left easting coordinate (i.e., horizontal)
-    # 1- The E-W pixel spacing
-    # 2- The rotation (0 degrees if image is "North Up")
-    # 3- The Upper left northing coordinate (i.e., vertical)
-    # 4- The rotation (0 degrees)
-    # 5- The N-S pixel spacing, negative as it is counted from the UL corner
-    x_size = g.RasterXSize  # Raster xsize
-    y_size = g.RasterYSize  # Raster ysize
-    epsg_to = 4326
-    epsg_to = int(epsg_to)
+    # Get environmental variable
+    WA_env_paths = os.environ["WA_PATHS"].split(';')
+    GDAL_env_path = WA_env_paths[0]
+    GDALWARP_PATH = os.path.join(GDAL_env_path, 'gdalwarp.exe')
 
-    # 2) Define the destination
-    wgs84 = osr.SpatialReference()
-    wgs84.ImportFromEPSG(epsg_to)
+    # find path to the executable
+    fullCmd = ' '.join(["%s" %(GDALWARP_PATH), '-overwrite -s_srs "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"', '-t_srs EPSG:%s -of GTiff' %(epsg_to), input_name, name_out])
+    Run_command_window(fullCmd)
 
-    inProj = Proj(proj4_str)
-    outProj = Proj(init='epsg:%d' %epsg_to)
-    # Up to here, all  the projection have been defined, as well as a
-    # transformation from the from to the to
-    ulx, uly = transform(inProj,outProj,geo_t[0], geo_t[3])
-    lrx, lry = transform(inProj,outProj,geo_t[0] + geo_t[1] * x_size,
-                                        geo_t[3] + geo_t[5] * y_size)
-
-    # See how using 27700 and WGS84 introduces a z-value!
-    # Now, we create an in-memory raster
-    mem_drv = gdal.GetDriverByName('GTiff')
-
-    # The size of the raster is given the new projection and pixel spacing
-    # Using the values we calculated above. Also, setting it to store one band
-    # and to use Float32 data type.
-    col = int((lrx - ulx)/pixel_spacing)
-    rows = int((uly - lry)/pixel_spacing)
-
-    # Re-define lr coordinates based on whole number or rows and columns
-    (lrx, lry) = (ulx + col * pixel_spacing, uly -
-                  rows * pixel_spacing)
-    name_reprojected= ''.join(dataset.split(".")[:-1]) + '_reprojected.tif'
-    dest = mem_drv.Create(name_reprojected, col, rows, 1, gdal.GDT_Float32)
-    b = dest.GetRasterBand(1)
-    b.SetNoDataValue(-9999)
-    if dest is None:
-        print('input folder to large for memory, clip input map')
-
-   # Calculate the new geotransform
-    new_geo = (ulx, pixel_spacing, geo_t[2], uly,
-               geo_t[4], - pixel_spacing)
-
-    # Set the geotransform
-    dest.SetGeoTransform(new_geo)
-    dest.SetProjection(wgs84.ExportToWkt())
-    
-    # Perform the projection/resampling
-    if method is 1:
-        gdal.ReprojectImage(g, dest, s_wkt, wgs84.ExportToWkt(),gdal.GRA_NearestNeighbour)
-    if method is 2:
-        gdal.ReprojectImage(g, dest, s_wkt, wgs84.ExportToWkt(),gdal.GRA_Bilinear)
-    if method is 3:
-        gdal.ReprojectImage(g, dest, s_wkt, wgs84.ExportToWkt(), gdal.GRA_Lanczos)
-    if method is 4:
-        gdal.ReprojectImage(g, dest, s_wkt, wgs84.ExportToWkt(), gdal.GRA_Average)
-    
-#    name_reprojected= ''.join(dataset.split(".")[:-1]) + '_reprojected2.tif'
-#    data1 = dest.GetRasterBand(1).ReadAsArray()
-#    geo1 = dest.GetGeoTransform()
-#    DC.Save_as_tiff(name=name_reprojected, data=data1, geo=geo1, projection='4326')
-#    return dest, ulx, lry, lrx, uly, epsg_to
-    return name_reprojected #, dest
-
-
-#def reproject_MODIS(input_name, epsg_to):
-#    '''
-#    Reproject the merged data file by using gdalwarp. The input projection must be the MODIS projection.
-#    The output projection can be defined by the user.
-#
-#    Keywords arguments:
-#    input_name -- 'C:/file/to/path/file.tif'
-#        string that defines the input tiff file
-#    epsg_to -- integer
-#        The EPSG code of the output dataset
-#    '''
-#    # Define the output name
-#    name_out = ''.join(input_name.split(".")[:-1]) + '_reprojected.tif'
-#
-#    # Get environmental variable
-#    WA_env_paths = os.environ["WA_PATHS"].split(';')
-#    GDAL_env_path = WA_env_paths[0]
-#    GDALWARP_PATH = os.path.join(GDAL_env_path, 'gdalwarp.exe')
-#
-#    # find path to the executable
-#    fullCmd = ' '.join(["%s" %(GDALWARP_PATH), '-overwrite -s_srs "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs"', '-t_srs EPSG:%s -of GTiff' %(epsg_to), input_name, name_out])
-#    Run_command_window(fullCmd)
-#
-#    return(name_out)
+    return(name_out)
 
 def reproject_dataset_example(dataset, dataset_example, method=1):
     """
