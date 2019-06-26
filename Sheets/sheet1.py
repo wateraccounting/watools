@@ -201,8 +201,8 @@ def create_sheet1(basin, period, units, data, output, template=False):
 
     land_et = et_l_pr + et_l_ut + et_l_mo + et_l_ma
 
-    xml_txt_box = tree.findall('''.//*[@id='landscape_et']''')[0]
-    xml_txt_box.getchildren()[0].text = '%.1f' % land_et
+#    xml_txt_box = tree.findall('''.//*[@id='landscape_et']''')[0]
+#    xml_txt_box.getchildren()[0].text = '%.1f' % land_et
 
     xml_txt_box = tree.findall('''.//*[@id='green_protected']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % et_l_pr
@@ -216,17 +216,23 @@ def create_sheet1(basin, period, units, data, output, template=False):
     xml_txt_box = tree.findall('''.//*[@id='green_managed']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % et_l_ma
 
-    xml_txt_box = tree.findall('''.//*[@id='et_rainfall']''')[0]
+    xml_txt_box = tree.findall('''.//*[@id='rainfall_et']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % land_et
+
+    # landscape et
+    landsc_et = land_et + et_u_pr + et_u_ut + et_u_mo
+    xml_txt_box = tree.findall('''.//*[@id='landscape_et']''')[0]
+    xml_txt_box.getchildren()[0].text = '%.1f' % landsc_et
 
     # Blue box (center)
 
-    exploitable_water = net_inflow - land_et
+    exploitable_water = net_inflow - land_et - et_u_pr - et_u_ut - et_u_mo
     reserved_outflow = max(com_o, nav_o, env_o)
 
     available_water = exploitable_water - non_uti - reserved_outflow
 
-    utilized_flow = et_u_pr + et_u_ut + et_u_mo + et_u_ma
+#    utilized_flow = et_u_pr + et_u_ut + et_u_mo + et_u_ma
+    utilized_flow = et_u_ma 
     utilizable_outflow = available_water - utilized_flow
 
     inc_et = et_manmade + et_natural
@@ -235,8 +241,11 @@ def create_sheet1(basin, period, units, data, output, template=False):
 
     non_rec_flow = et_u_pr + et_u_ut + et_u_mo + et_u_ma - inc_et - other_o
 
-    xml_txt_box = tree.findall('''.//*[@id='incremental_et']''')[0]
-    xml_txt_box.getchildren()[0].text = '%.1f' % inc_et
+    xml_txt_box = tree.findall('''.//*[@id='incremental_etman']''')[0]
+    xml_txt_box.getchildren()[0].text = '%.1f' % et_manmade
+
+    xml_txt_box = tree.findall('''.//*[@id='incremental_etnat']''')[0]
+    xml_txt_box.getchildren()[0].text = '%.1f' % et_natural
 
     xml_txt_box = tree.findall('''.//*[@id='exploitable_water']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % exploitable_water
@@ -244,8 +253,8 @@ def create_sheet1(basin, period, units, data, output, template=False):
     xml_txt_box = tree.findall('''.//*[@id='available_water']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % available_water
 
-    xml_txt_box = tree.findall('''.//*[@id='utilized_flow']''')[0]
-    xml_txt_box.getchildren()[0].text = '%.1f' % utilized_flow
+#    xml_txt_box = tree.findall('''.//*[@id='utilized_flow']''')[0]
+#    xml_txt_box.getchildren()[0].text = '{1:.{0}f}'.format(decimals, utilized_flow)
 
     xml_txt_box = tree.findall('''.//*[@id='blue_protected']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % et_u_pr
@@ -271,21 +280,22 @@ def create_sheet1(basin, period, units, data, output, template=False):
     xml_txt_box = tree.findall('''.//*[@id='non-consumed_water']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % non_cons_water
 
-    xml_txt_box = tree.findall('''.//*[@id='manmade']''')[0]
-    xml_txt_box.getchildren()[0].text = '%.1f' % et_manmade
+#    xml_txt_box = tree.findall('''.//*[@id='manmade']''')[0]
+#    xml_txt_box.getchildren()[0].text = '{1:.{0}f}'.format(decimals, et_manmade)
+#
+#    xml_txt_box = tree.findall('''.//*[@id='natural']''')[0]
+#    xml_txt_box.getchildren()[0].text = '{1:.{0}f}'.format(decimals, et_natural)
 
-    xml_txt_box = tree.findall('''.//*[@id='natural']''')[0]
-    xml_txt_box.getchildren()[0].text = '%.1f' % et_natural
-
-    xml_txt_box = tree.findall('''.//*[@id='other']''')[0]
-    xml_txt_box.getchildren()[0].text = '%.1f' % other_o
+#    xml_txt_box = tree.findall('''.//*[@id='other']''')[0]
+#    xml_txt_box.getchildren()[0].text = '{1:.{0}f}'.format(decimals, other_o)
 
     xml_txt_box = tree.findall('''.//*[@id='non-recoverable_flow']''')[0]
     xml_txt_box.getchildren()[0].text = '%.1f' % non_rec_flow
 
+
     # Blue box (right)
 
-    outflow = non_cons_water + non_rec_flow + basin_transfers
+    outflow = non_cons_water + non_rec_flow 
 
     q_sw_out = sw_mrs_o + sw_tri_o + sw_usw_o + sw_flo_o
     q_gw_out = gw_nat_o + gw_uti_o
@@ -304,7 +314,7 @@ def create_sheet1(basin, period, units, data, output, template=False):
 
     # Dark-green box
 
-    consumed_water = land_et + utilized_flow
+    consumed_water = landsc_et + utilized_flow
     depleted_water = consumed_water - p_recy - non_rec_flow
     external_out = depleted_water + outflow
 
@@ -344,9 +354,9 @@ def create_sheet1(basin, period, units, data, output, template=False):
         Path_Inkscape = os.path.join(Inkscape_env_path,'inkscape.exe')
 
     # Export svg to png
-    tempout_path = output.replace('.pdf', '_temporary.svg')
+    tempout_path = output.replace('.png', '_temporary.svg')
     tree.write(tempout_path)
-    subprocess.call([Path_Inkscape,tempout_path,'--export-pdf='+output, '-d 300'])
+    subprocess.call([Path_Inkscape,tempout_path,'--export-png='+output, '-d 300'])
     time.sleep(10)
     os.remove(tempout_path)
 
